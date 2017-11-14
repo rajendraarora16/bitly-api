@@ -1,7 +1,17 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 
-$url = 'https://api-ssl.bitly.com/v3/shorten?access_token=b0023184f8bca0f0f5f302fe71909f27de077ab6&longUrl='.rawurlencode($_GET['longurl']);
+$urlType = $_GET['urlType'];
+
+if($urlType == "longurl"){
+    $urlName = rawurlencode($_GET['longurl']);
+    $urlS = "shorten";
+}else {
+    $urlName = rawurlencode($_GET['shorturl']);
+    $urlS = "expand";
+}
+
+$url = 'https://api-ssl.bitly.com/v3/'.$urlS.'?access_token=b0023184f8bca0f0f5f302fe71909f27de077ab6&'.$urlType.'='.$urlName;
 
 // Display errors
 ini_set('display_errors',1);
