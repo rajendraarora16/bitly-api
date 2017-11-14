@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bulk URL shortner</title>
+        <link href='https://fonts.googleapis.com/css?family=Roboto:400,500,400italic,300italic,300,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <!-- Global CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">   
+        <!-- Plugins CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <style type="text/css">
+            .center-div{
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+            }
+        </style>
+        <!-- Google Short URL -->
+        <script type="text/javascript">
+            function generateUrl(urlType) {
+
+                var inputURL = $("#inputURL").val();
+
+                if(inputURL === ''){
+                    alert("Please enter the URL!");
+                }else{
+                    var urlS;
+                    if(urlType == "longurl"){
+                        urlS = "longurl";
+                    }else{
+                        urlS = "shorturl";
+                    }
+
+                    $("#generate-short-URL").text("");
+
+                    $.ajax({
+                        async: true,
+                        url: 'https://shorturl-assignment.herokuapp.com/api.php',
+                        data: "urlType="+urlS+"&"+urlS+"="+inputURL,
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#generateShortURL").css({ 'background': '#e8e8e8' });
+                            $("#container-msg").html("<span>Generating ...</span>");
+                        },
+                        complete : function() {
+                            $("#generateShortURL").css({ 'background': '#fff' });
+                            //$("#container-msg").html("");
+                        },
+                        success: function(response) {
+                            if(urlType == "longurl"){
+                                if(response["status_code"] == 200){
+                                    $("#container-msg").text("");
+                                    $("#container-msg").text("");
+                                    $("#container-msg").html("<span>Shortned URL: <a href="+response["data"]["url"]+" target='_blank'>"+response["data"]["url"]+"</a></span>");
+                                }else if(response["status_code"] == 500){
+                                    $("#container-msg").text("");
+                                    $("#container-msg").html("<span><strong>Something went wrong!</strong><br/> Error status: '"+response["status_txt"]+"'</span>");
+                                }else{
+                                    $("#container-msg").text("");
+                                    $("#container-msg").html("<span><strong>Something went wrong! We couldn't identify what just happened!!</strong></span>");
+                                }
+                            }else{
+                                if(response["status_code"] == 200){
+                                    if(response["data"]["expand"][0]["long_url"] !== undefined){
+                                        $("#container-msg").text("");
+                                        $("#container-msg").html("<span>Expanded URL: <a href="+response["data"]["expand"][0]["long_url"]+" target='_blank'>"+response["data"]["expand"][0]["long_url"]+"</a></span>");
+                                    }else{
+                                        $("#container-msg").text("");
+                                        $("#container-msg").html("<span><strong>Something went wrong! Looks like your URL is not correct!!</strong></span>");
+                                    }
+                                }else{
+                                    $("#container-msg").text("");
+                                    $("#container-msg").html("<span><strong>Something went wrong!! We couldn't identify what just happened!!</strong></span>");
+                                }
+                            }
+                        }
+                    });
+                }
+            }    
+        </script>
+    </head>
+    <body>
+        <div class="center-div">
+            <h1><a class="link-mask" data-toggle="modal" data-target="#short_url_modal" href="#">URL Shortner - Expander</a></h1>
+            <p>Powered by Bitly API.</p>
+        </div>
+        <!-- Modal for Shorten long URL -->
+ 	<div class="modal fade" id="short_url_modal" role="dialog">
+        <div class="modal-dialog">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">URL Shortner - Expander</h4>
+                    <p>Powered by Bitly API.</p>
+                </div>
+                <div class="modal-body">
+                    <strong>Type URL:</strong> <br/><input id="inputURL" rows="5" style="width:500px;" placeholder="Please enter URL" onFocus="this.select()" />
+                    <br/><br/>
+                    <div id="container-msg">
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="generateShortURL" type="button" class="btn btn-default pull-left" onclick="generateUrl('longurl');">Shortner</button>
+                    <button id="generateShortURL" type="button" class="btn btn-default pull-left" onclick="generateUrl('shorturl');">Expander</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+                
+            </div>
+        </div>
+    </body>
+</html>
